@@ -52,7 +52,7 @@ export default function DemoPanel(): React.JSX.Element {
 
   return (
     <Pressable style={s.overlay} onPress={() => PluginManager.closePluginView()}>
-      <Pressable style={[s.panel, { height: panelH }]} onPress={e => e.stopPropagation()}>
+      <Pressable style={[s.panel, { height: panelH }]} onPress={(e: any) => e.stopPropagation()}>
         <View style={s.header}>
           <Text style={s.title}>Demo plugin</Text>
           <Pressable style={s.close} onPress={() => PluginManager.closePluginView()}>
@@ -98,7 +98,7 @@ export default function DemoPanel(): React.JSX.Element {
                 <Text style={[s.desc, { flex: 1 }]}>
                   Fit more on screen at the cost of tap accuracy.
                 </Text>
-                <Switch value={settings.compact} onValueChange={v => void update({ compact: v })} />
+                <Switch value={settings.compact} onValueChange={(v: boolean) => void update({ compact: v })} />
               </View>
               <Text style={[s.desc, { marginTop: 20 }]}>
                 Everything on this screen is stored in AsyncStorage and reloads

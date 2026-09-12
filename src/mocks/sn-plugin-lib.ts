@@ -130,12 +130,19 @@ function apiFor(name: string) {
   });
 }
 
-export const PluginManager = apiFor('PluginManager');
-export const PluginCommAPI = apiFor('PluginCommAPI');
-export const PluginFileAPI = apiFor('PluginFileAPI');
-export const PluginNoteAPI = apiFor('PluginNoteAPI');
-export const PluginDocAPI = apiFor('PluginDocAPI');
-export const NativePluginManager = apiFor('NativePluginManager');
+/**
+ * Typed `any`, deliberately. A Proxy answers every property, so there is no
+ * honest interface to write here — and pretending to one would mean this file
+ * silently going stale against the SDK it is standing in for. Your plugin is
+ * type-checked against the real sn-plugin-lib in its own repo; this only has to
+ * let a browser build through.
+ */
+export const PluginManager: any = apiFor('PluginManager');
+export const PluginCommAPI: any = apiFor('PluginCommAPI');
+export const PluginFileAPI: any = apiFor('PluginFileAPI');
+export const PluginNoteAPI: any = apiFor('PluginNoteAPI');
+export const PluginDocAPI: any = apiFor('PluginDocAPI');
+export const NativePluginManager: any = apiFor('NativePluginManager');
 
 export const EventType = { BUTTON_CLICK: 1, PEN_UP: 2 };
 export const ElementType = {

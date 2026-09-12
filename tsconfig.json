@@ -11,7 +11,7 @@
     "allowJs": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "types": ["vite/client"],
+    "types": ["vite/client", "node"],
     "paths": {
       "react-native": ["./src/mocks/react-native.ts"],
       "sn-plugin-lib": ["./src/mocks/sn-plugin-lib.ts"],

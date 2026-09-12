@@ -134,6 +134,14 @@ function Device() {
   );
 }
 
+/**
+ * Cached on the container, because Vite's hot reload re-runs this module
+ * against a DOM node that already has a root — which React reports as an error
+ * that looks like a bug in the harness rather than what it is.
+ */
+const container = document.getElementById('root')! as HTMLElement & { _root?: ReturnType<typeof createRoot> };
+
 void boot().then(() => {
-  createRoot(document.getElementById('root')!).render(<Device />);
+  container._root ??= createRoot(container);
+  container._root.render(<Device />);
 });

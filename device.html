@@ -14,12 +14,17 @@
   <body>
     <div id="root"></div>
     <!--
-      Metro's asset require(). The bundled Whimsy pack declares its PNGs with
-      require('../../assets/...') at module scope, which is a compile-time
-      construct in a React Native bundle and simply absent in a browser. It has
-      to exist before the module graph is evaluated, hence a classic script tag
-      here rather than anything inside device.tsx, whose imports hoist above
-      every statement in it.
+      Metro's asset require(). React Native code declares bundled images as
+      require('./assets/thing.png') at module scope — a compile-time construct
+      in a Metro bundle, and absent in a browser. It has to exist before the
+      module graph is evaluated, hence a classic script tag here rather than
+      anything inside device.tsx, whose imports hoist above every statement in
+      it.
+
+      The stub returns the path as a uri, which is enough for code that hands
+      the result to Image.resolveAssetSource() or copies it somewhere. If your
+      plugin needs the real bytes, import the asset normally in your preview
+      config and pass it through a scenario instead.
     -->
     <script>
       window.require = function (p) { return { uri: String(p), __rnAsset: true }; };
