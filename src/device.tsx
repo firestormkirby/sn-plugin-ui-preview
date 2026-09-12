@@ -1,5 +1,5 @@
 /**
- * device.tsx — boots your plugin's UI inside a browser-sized "device screen".
+ * device.tsx boots your plugin's UI inside a browser-sized "device screen".
  *
  * Loaded in an iframe the harness sizes to the device's screen. That matters:
  * React Native UIs measure themselves against useWindowDimensions(), so
@@ -39,7 +39,7 @@ async function boot(): Promise<void> {
    * A plugin that maps taps to page coordinates typically fits the page inside
    * the screen preserving aspect ratio. A page whose shape disagrees with the
    * screen therefore gets letterboxed, and every tap in the resulting bars
-   * clamps to the page edge — which presents as an invisible margin that
+   * clamps to the page edge, which presents as an invisible margin that
    * nothing can be positioned past. Inside the iframe one CSS pixel is one page
    * pixel, so these two must agree.
    */
@@ -48,7 +48,7 @@ async function boot(): Promise<void> {
   await config.boot?.(scenario);
 }
 
-/** The page behind the panel — see Scenario.backdrop. */
+/** The page behind the panel. See Scenario.backdrop. */
 function Backdrop() {
   if (!scenario.backdrop) return null;
   return (
@@ -63,7 +63,7 @@ function Backdrop() {
 /**
  * Stands in for the world the panel closes into.
  *
- * Closing is not an edge case for a Supernote plugin — work that cannot run
+ * Closing is not an edge case for a Supernote plugin. Work that cannot run
  * while the panel is open runs after it closes. A harness that unmounted on
  * close, or ignored it, would make those flows impossible to walk through.
  */
@@ -136,7 +136,7 @@ function Device() {
 
 /**
  * Cached on the container, because Vite's hot reload re-runs this module
- * against a DOM node that already has a root — which React reports as an error
+ * against a DOM node that already has a root, which React reports as an error
  * that looks like a bug in the harness rather than what it is.
  */
 const container = document.getElementById('root')! as HTMLElement & { _root?: ReturnType<typeof createRoot> };

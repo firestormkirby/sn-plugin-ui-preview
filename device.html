@@ -15,8 +15,8 @@
     <div id="root"></div>
     <!--
       Metro's asset require(). React Native code declares bundled images as
-      require('./assets/thing.png') at module scope — a compile-time construct
-      in a Metro bundle, and absent in a browser. It has to exist before the
+      require('./assets/thing.png') at module scope, a compile-time construct
+      in a Metro bundle that is absent in a browser. It has to exist before the
       module graph is evaluated, hence a classic script tag here rather than
       anything inside device.tsx, whose imports hoist above every statement in
       it.

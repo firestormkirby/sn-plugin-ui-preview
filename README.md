@@ -1,73 +1,70 @@
 # sn-plugin-ui-preview
 
-Run a Supernote plugin's React Native UI in a browser, so copy, layout and flow
-can be worked on without building, pushing and installing a `.snplg` each time.
-
-It is not a mock-up or a re-implementation. Your components and your storage
-layer are imported from your repo and run unmodified; four modules that cannot
-exist in a browser are substituted, and nothing else. **Change a label in your
-source and it changes in the preview on save.**
+A user interface preview for Supernote plugins. It runs your plugin's React
+Native panel in a browser so you can work on layout, copy and flow without
+building a `.snplg` and installing it on a device.
 
 ```bash
 npm install
-npm run dev          # http://localhost:5178 — runs the bundled example
+npm run dev
 ```
 
-Then point `preview.config.tsx` at your own panel.
+That serves http://localhost:5178 with a small demo plugin. Point
+`preview.config.tsx` at your own panel to see yours instead.
 
----
+## What it does
 
-## Read this first: what it does not do
+**Runs your real components.** Your panel and your stores are imported from
+your repo and run as they are. Change a label in your source, save, and the
+browser updates.
 
-**It cannot catch the deadlock that defines this SDK.** `PluginComm` and
-`PluginFile` calls made while the plugin view is open hang on a real device.
-Here they resolve instantly. You can build an entire flow in this harness,
-watch it work perfectly, and have it lock up the moment it runs on hardware.
+**Sizes the screen like a device.** The preview is its own document in an
+iframe set to the device's screen size, so a panel that measures itself with
+`useWindowDimensions()` comes out the shape it will be on a Nomad or a Manta.
+Presets for both ship with it, and you can add your own.
 
-That is the single most important limitation and it is not fixable from a
-browser: the behaviour lives in the host process, not in the SDK's shape.
+**Stages screens from saved data.** A scenario is the AsyncStorage contents of a
+device in some state. Your plugin's own startup code reads it, so a staged
+screen goes through the same load path as a real one.
 
-Two smaller ones worth knowing:
+**Answers the SDK.** Calls return the SDK's success shape, and anything the mock
+has not been told about logs itself with its arguments, which gives you a trace
+of what a screen actually asks for. Where a real return value drives the UI, a
+page count or a lasso rect or a keyword list, you supply it per scenario.
 
-- **react-native-web is CSS flexbox, not Yoga.** Very close, not identical —
-  notably `flexShrink` defaults differ. Layout that depends on flex edge cases
-  can behave differently here than on device. Good for copy, spacing and gross
-  layout; not authoritative for the awkward cases.
-- **Nothing is written.** Calls that would insert pages, write elements or
-  overwrite files report success having done nothing.
+**Draws a backdrop.** For a plugin that sits on top of a page, a scenario can
+put an image behind the panel, so tap placement and overlays have something to
+aim at.
 
-Use it for what it is: iterate on the interface here, verify behaviour on the
-device.
+**Models closing the panel.** `closePluginView()` shows a closed state with a
+reopen button, so you can walk through a flow that leaves the panel, does work
+in the background, and comes back.
 
----
-
-## What gets substituted
-
-| Module | Replaced with | Why |
-|---|---|---|
-| `react-native` | `react-native-web` + shims | The only way to render RN components in a browser. |
-| `sn-plugin-lib` | a Proxy-backed mock | Native TurboModule. Unknown calls resolve to `{success: true}` and log themselves. |
-| `react-native-fs` | a fake `/storage` tree | So file pickers and folder scans have real content. |
-| `@react-native-async-storage/async-storage` | an in-memory map | Seeded per scenario; a reload is a clean device. |
-
-Everything else — every file in your `src/` — is the real thing.
+**Serves on your network.** It listens on every interface, so you can open the
+preview on a tablet or a second machine, over Tailscale or a LAN.
 
 ## Setting it up for your plugin
 
-**1. Put it somewhere it can see your source.** Either clone it next to your
-plugin, or drop it inside your repo as `tools/ui-preview/`. Set `PLUGIN_ROOT`
-in `vite.config.ts` accordingly; it only controls which directory Vite is
-allowed to read outside its own root.
+**1. Install your plugin's dependencies.** Run `npm install` in your plugin repo
+as well as here. Vite reads the nearest `tsconfig.json` to each file it
+transforms, and a React Native tsconfig usually extends
+`@react-native/typescript-config`, which is a package. Without it you get a
+TypeScript config error on every module.
 
-**2. Edit `preview.config.tsx`.** Three things:
+**2. Put the preview where it can see your source.** Either clone it beside your
+plugin, or copy it into your repo as `tools/ui-preview/`. Set `PLUGIN_ROOT` at
+the top of `vite.config.ts` to your plugin's root. That is the only directory
+outside its own root that Vite is allowed to read.
+
+**3. Edit `preview.config.tsx`.**
 
 ```tsx
-import HitboxPalette from '../../src/ui/HitboxPalette';
+import MyPanel from '../../src/ui/MyPanel';
 import { initSettingsFromStorage } from '../../src/storage/settings';
 
 const config: PreviewConfig = {
   name: 'My plugin',
-  Panel: HitboxPalette,
+  Panel: MyPanel,
 
   // Your plugin's own startup, in the order index.js does it.
   boot: async () => {
@@ -85,25 +82,29 @@ const config: PreviewConfig = {
 };
 ```
 
-**3. That is the whole integration.** If a screen renders, you are done.
+If your plugin loads its storage lazily inside components, leave `boot` out.
+
+Four modules are swapped for browser versions, and everything else comes from
+your repo:
+
+| Module | Swapped for |
+|---|---|
+| `react-native` | `react-native-web`, plus the Android only APIs it lacks |
+| `sn-plugin-lib` | a mock that answers every call |
+| `react-native-fs` | a fake `/storage` tree |
+| `@react-native-async-storage/async-storage` | an in memory map, seeded per scenario |
 
 ## Scenarios
 
-A scenario is the AsyncStorage contents of a device in some state, loaded by
-your real `init*FromStorage()` code. It contains no UI instructions, on purpose:
-if a screen can only be reached by a back door, that is usually worth knowing
-about the plugin rather than a reason to add one here.
+A scenario holds the data behind a screen, and nothing about the screen itself.
+As well as `storage` it can carry `files` (entries in the fake filesystem), `sdk`
+(different answers from the SDK, a bigger file or a live lasso selection) and
+`backdrop` (the image drawn behind the panel).
 
-A scenario can also carry `files` (extra entries in the fake filesystem), `sdk`
-(different answers from the SDK — a bigger file, a lasso selection, a keyword
-list) and `backdrop` (an image drawn behind the panel, for a plugin that sits on
-top of a page).
+Reloading the page resets everything, so the same screenshot taken twice looks
+the same. Anything you want to keep belongs in a scenario.
 
 ## SDK answers
-
-Anything the mock has not been told about resolves to `{success: true}` and logs
-the call with its arguments — which doubles as a trace of what a screen actually
-asks the SDK for. When a real return value drives what renders, add it:
 
 ```tsx
 sdk: {
@@ -118,36 +119,45 @@ sdk: {
 }
 ```
 
-## Why the device screen is an iframe
+Calls that would write to a file report success and log what they were asked to
+do, so clicking around a preview leaves your notes alone.
 
-React Native UIs measure themselves against `useWindowDimensions()`. Rendering
-into a `<div>` inside a normal page gives them the browser window's size, so the
-panel comes out the wrong shape for the device you are documenting. The preview
-is therefore a separate document sized to exactly the device's screen, which the
-harness scales for viewing.
+## Screenshots
 
-**One consequence is load-bearing: the page size must equal the window size.**
-`Dimensions.get('screen') × PixelRatio.get()` multiplies out to the page's pixel
-size on a device; in a browser those describe the developer's monitor. A plugin
-that maps taps to page coordinates usually fits the page inside the screen
-preserving aspect ratio, so a mismatched page size gets letterboxed — and every
-tap in the resulting bars clamps to the page edge, which presents as an
-invisible margin nothing can be positioned past. `src/mocks/react-native.ts`
-overrides both APIs so one CSS pixel is one page pixel. Don't hardcode a page
-size anywhere.
+**Open device view alone** serves the preview by itself at full device
+resolution with no sidebar. Capture that. The zoom control is for looking at the
+page while you work; anything below 100% gives you a scaled screenshot.
 
-## Taking screenshots
+## Page size and tap coordinates
 
-**Open device view alone** serves the preview on its own at full device
-resolution, no harness chrome — capture that. The zoom control is for looking;
-anything below 100% is a scaled screenshot.
+The mocks report the screen as the iframe, and the pixel ratio as 1, so one CSS
+pixel is one page pixel.
+
+This matters for any plugin that maps taps to page coordinates. On a device,
+`Dimensions.get('screen')` times `PixelRatio.get()` gives the page's pixel size.
+In a browser those describe the desktop you happen to be sitting at. A page size
+that disagrees with the screen gets letterboxed, and taps in the bars clamp to
+the page edge, which looks like an invisible margin nothing can be placed past.
+Keep page size and window size equal.
+
+## The SDK limitation to keep in mind
+
+On a device, `PluginComm` and `PluginFile` calls deadlock while the plugin view
+is open. Here they resolve instantly. That behaviour lives in the host process,
+so a flow can look right in the browser and lock up on hardware.
+
+Work on the interface here, then confirm behaviour on the device.
+
+One smaller difference worth knowing: react-native-web is CSS flexbox rather
+than Yoga. The two agree on almost everything, though `flexShrink` defaults
+differ, so layout that leans on flex edge cases can land differently.
 
 ## Adding to the mocks
 
-If your plugin imports something react-native-web lacks (an Android-only module,
-a native module of your own), add it to `src/mocks/react-native.ts` next to
-`ToastAndroid`, or give it its own file and an alias in `vite.config.ts`. Both
-are a few lines. Pull requests welcome for anything generally useful.
+If your plugin imports something react-native-web does not have, add it to
+`src/mocks/react-native.ts` next to `ToastAndroid`. If it calls part of the SDK
+the mock has no answer for, add it to `src/mocks/sn-plugin-lib.ts`. Both are a
+few lines. Pull requests welcome for anything other plugins would use.
 
 ## Licence
 

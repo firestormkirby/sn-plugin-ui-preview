@@ -3,7 +3,7 @@
  *
  * The SDK is a native TurboModule, so none of it can run here. Every call
  * resolves to the SDK's own success shape, `{ success: true, result: undefined }`
- * — which is also what a real device returns for a surprising number of calls,
+ * which is also what a real device returns for a surprising number of calls,
  * so your "did it work" branches behave the way they do on hardware.
  *
  * ── What this is NOT ──────────────────────────────────────────────────────
@@ -15,7 +15,7 @@
  * ── Adding real answers ───────────────────────────────────────────────────
  * Anything not given an explicit answer is handled by a Proxy: it returns a
  * function for any property, so a call this file has never heard of resolves
- * instead of throwing on undefined, and logs itself with its arguments — which
+ * instead of throwing on undefined, and logs itself with its arguments, which
  * doubles as a trace of what a screen actually asks the SDK for.
  *
  * When a real return value drives what renders (a page count, a lasso rect, a
@@ -96,6 +96,29 @@ const defaults: Record<string, Record<string, (...args: any[]) => any>> = {
     insertImage: () => ok(),
   },
   PluginDocAPI: {},
+  /**
+   * Filesystem helpers. Answers are deliberately "nothing is there": an empty
+   * listing and exists:false, so a plugin renders its empty state rather than
+   * a half-populated one built from guesses. Give a scenario real answers
+   * through `sdk.overrides` when a screen needs files to show.
+   */
+  FileUtils: {
+    exists: () => ok(false),
+    listFiles: () => ok([]),
+    makeDir: () => ok(true),
+    deleteFile: () => ok(true),
+    renameToFile: () => ok(true),
+    openFilePath: () => ok(),
+    getExportPath: () => ok('/storage/emulated/0/EXPORT'),
+  },
+  /**
+   * The native file picker. Returns nothing chosen, which is the "user backed
+   * out" path. A browser cannot show the device's picker, and inventing a
+   * selection would send the plugin down a branch the user never took.
+   */
+  RattaFileSelector: {
+    selectFile: () => ok(null),
+  },
   NativePluginManager: {
     getPluginDirPath: () => Promise.resolve('/data/plugin/preview'),
     getOrientation: () => Promise.resolve(0),
@@ -132,7 +155,7 @@ function apiFor(name: string) {
 
 /**
  * Typed `any`, deliberately. A Proxy answers every property, so there is no
- * honest interface to write here — and pretending to one would mean this file
+ * honest interface to write here, and pretending to one would mean this file
  * silently going stale against the SDK it is standing in for. Your plugin is
  * type-checked against the real sn-plugin-lib in its own repo; this only has to
  * let a browser build through.
@@ -142,6 +165,8 @@ export const PluginCommAPI: any = apiFor('PluginCommAPI');
 export const PluginFileAPI: any = apiFor('PluginFileAPI');
 export const PluginNoteAPI: any = apiFor('PluginNoteAPI');
 export const PluginDocAPI: any = apiFor('PluginDocAPI');
+export const FileUtils: any = apiFor('FileUtils');
+export const RattaFileSelector: any = apiFor('RattaFileSelector');
 export const NativePluginManager: any = apiFor('NativePluginManager');
 
 export const EventType = { BUTTON_CLICK: 1, PEN_UP: 2 };
@@ -156,5 +181,5 @@ export const PointUtils = {
 
 export default {
   PluginManager, PluginCommAPI, PluginFileAPI, PluginNoteAPI,
-  PluginDocAPI, NativePluginManager,
+  PluginDocAPI, NativePluginManager, FileUtils, RattaFileSelector,
 };

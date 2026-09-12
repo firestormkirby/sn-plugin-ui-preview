@@ -140,7 +140,7 @@ const RNFS = {
 
   async hash(path: string): Promise<string> {
     // Template IDs are content hashes. A stable fake keyed on the path is
-    // enough, since the UI only compares them for equality — but a scenario
+    // enough, since the UI only compares them for equality, but a scenario
     // that wants a template to look ALREADY KNOWN has to pin the hash to the
     // id it seeded, or the Hitboxes tab greets every screenshot with
     // "Template changes detected. Import prior configuration?".

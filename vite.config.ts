@@ -6,24 +6,24 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 /**
- * Where your plugin's source lives, relative to this folder.
+ * Your plugin's repo root, relative to this folder. Edit it to match where you
+ * put the preview.
  *
- * Two layouts both work. Keep this harness inside your plugin repo (say
- * `tools/ui-preview/`) and point at `../../src`; or keep it as a sibling
- * checkout and point at `../my-plugin/src`. Vite is told it may read outside
- * its own root either way — see `server.fs.allow`.
+ *   '../..'         inside your plugin repo, as tools/ui-preview/
+ *   '../my-plugin'  cloned beside your plugin
+ *
+ * It is the one directory outside this root that Vite may read, so your source
+ * has to be under it. See `server.fs.allow` below.
  */
-const PLUGIN_ROOT = path.resolve(here, process.env.PLUGIN_ROOT ?? '..');
+const PLUGIN_ROOT = path.resolve(here, '../..');
 
 export default defineConfig({
   root: here,
   plugins: [react()],
   resolve: {
     /**
-     * The four substitutions that let device code run in a browser. Everything
-     * else — all of your plugin's own source — is imported unmodified, which is
-     * the point: what you see here is the code that ships, not a copy of it
-     * that will drift.
+     * The four substitutions that let device code run in a browser. Your own
+     * source is imported as it is, so what you see here is the code that ships.
      *
      * The array form, with anchored patterns, because the object form matches
      * by PREFIX: a bare 'react-native' key would also capture 'react-native-fs'
@@ -53,7 +53,7 @@ export default defineConfig({
     port: 5178,
     /**
      * Listen on every interface, not loopback only, so the preview is reachable
-     * from another machine — a tablet, a second desktop, a colleague on the
+     * from another machine: a tablet, a second desktop, a colleague on the
      * same network. `true` means 0.0.0.0: every network this machine is on. It
      * serves a dev page with fixture data and no write path to anything, but if
      * that is not a trade you want, put a specific address here instead.
@@ -61,7 +61,7 @@ export default defineConfig({
     host: true,
     /**
      * Vite refuses requests whose Host header it does not recognise (DNS
-     * rebinding protection), answering "Blocked request" — which reads exactly
+     * rebinding protection), answering "Blocked request", which reads exactly
      * like the server not running. Add the names you reach it by: a LAN IP, a
      * Tailscale address, `.ts.net` for MagicDNS.
      */

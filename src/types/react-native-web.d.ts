@@ -2,7 +2,7 @@
  * react-native-web ships no type declarations.
  *
  * A shorthand `declare module 'react-native-web';` would type the whole module
- * as `any`, and `export *` from an `any` module re-exports NOTHING — so every
+ * as `any`, and `export *` from an `any` module re-exports NOTHING, so every
  * `import { View } from 'react-native'` in your plugin would fail to resolve.
  * The names therefore have to be listed.
  *

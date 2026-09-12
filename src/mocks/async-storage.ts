@@ -19,7 +19,7 @@ export function seed(values: Record<string, unknown>): void {
   }
 }
 
-/** Everything currently stored — useful when working out what a screen reads. */
+/** Everything currently stored, for working out what a screen reads. */
 export function dump(): Record<string, string> {
   return Object.fromEntries(store);
 }

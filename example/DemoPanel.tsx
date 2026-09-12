@@ -1,8 +1,8 @@
 /**
  * A stand-in plugin panel, so `npm run dev` shows something on a fresh clone.
  *
- * Written the way a real plugin is — React Native components, AsyncStorage for
- * state, SDK calls for everything else — so that replacing it with your own
+ * Written the way a real plugin is, with React Native components, AsyncStorage
+ * for state and SDK calls for everything else, so that replacing it with your own
  * component is the only step. Delete this folder once you have.
  */
 import React, { useEffect, useState } from 'react';
@@ -40,7 +40,7 @@ export default function DemoPanel(): React.JSX.Element {
         PluginFileAPI.getNoteTotalPageNum(''),
       ]);
       const name = String(pathRes?.result ?? '').split('/').pop() ?? 'unknown';
-      setWhere(`${name} — page ${Number(pageRes?.result ?? 0) + 1} of ${totalRes?.result ?? '?'}`);
+      setWhere(`${name}, page ${Number(pageRes?.result ?? 0) + 1} of ${totalRes?.result ?? '?'}`);
     })();
   }, []);
 
@@ -86,7 +86,7 @@ export default function DemoPanel(): React.JSX.Element {
               </Pressable>
               <Pressable
                 style={[s.btn, s.btnQuiet]}
-                onPress={() => PluginManager.showToast('Nothing was written — this is a preview.')}
+                onPress={() => PluginManager.showToast('Nothing was written. This is a preview.')}
               >
                 <Text style={s.btnText}>Show a toast</Text>
               </Pressable>

@@ -12,7 +12,7 @@ import type { PreviewConfig } from './src/config';
 import DemoPanel from './example/DemoPanel';
 
 // For a real plugin this is the interesting line, and it imports straight from
-// your source — no copy, no re-implementation:
+// your source:
 //
 //   import HitboxPalette from '../../src/ui/HitboxPalette';
 //
@@ -58,7 +58,7 @@ const config: PreviewConfig = {
     {
       id: 'fresh',
       label: 'Fresh install',
-      note: 'Nothing stored yet — first-run state.',
+      note: 'Nothing stored yet, first run state.',
       storage: {},
     },
     {

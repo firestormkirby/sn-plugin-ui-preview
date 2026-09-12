@@ -2,7 +2,7 @@
  * The contract between this harness and your plugin.
  *
  * Everything the harness needs to know about a specific plugin lives in one
- * file — `preview.config.tsx` in the repo root — which exports a PreviewConfig.
+ * file, `preview.config.tsx` in the repo root, which exports a PreviewConfig.
  * Nothing else in src/ should need editing to preview a different plugin.
  */
 import type { ComponentType } from 'react';
@@ -17,7 +17,7 @@ export interface FakeFile {
 /**
  * One saved state of a device, and the only mechanism for staging a screen.
  *
- * The point is that a scenario contains no UI instructions — it is the data a
+ * The point is that a scenario contains no UI instructions. It is the data a
  * real device would have, handed to your plugin's real loading code. If a
  * screen cannot be reached by seeding data, that is usually worth knowing about
  * the plugin, not a reason to add a back door here.
@@ -34,7 +34,7 @@ export interface Scenario {
   /** SDK answers for this scenario, merged over `sdk` below. */
   sdk?: SdkConfig;
   /**
-   * Image URL drawn behind the panel — a note page, a document, whatever your
+   * Image URL drawn behind the panel: a note page, a document, whatever your
    * plugin sits on top of. Import it so the bundler resolves it:
    * `import page from './assets/page.png'`.
    */
@@ -56,7 +56,7 @@ export interface DevicePreset {
  * `overrides` is keyed by API object then method, and is merged over the
  * defaults: anything you do not list keeps the generic behaviour (resolve to
  * `{success: true}` and log the call). Add an entry when a real return value
- * drives what renders — a page count, a lasso rect, a keyword list.
+ * drives what renders, a page count or a lasso rect or a keyword list.
  */
 export interface SdkConfig {
   /** Answers to the common "where am I" questions. */
@@ -79,7 +79,7 @@ export interface PreviewConfig {
   /**
    * Runs once before the panel mounts, after storage and files are seeded.
    *
-   * This is where your plugin's own startup goes — the `init*FromStorage()`
+   * This is where your plugin's own startup goes, the `init*FromStorage()`
    * calls it makes in index.js, in the same order. Keeping it here rather than
    * inside the harness means a scenario is loaded by your shipping code.
    */

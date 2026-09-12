@@ -1,5 +1,5 @@
 /**
- * harness.ts — the chrome around the device iframe.
+ * harness.ts, the chrome around the device iframe.
  *
  * Deliberately plain DOM: nothing here shares a React tree, a style system or a
  * bundle path with the thing being previewed, so a harness bug can never be
