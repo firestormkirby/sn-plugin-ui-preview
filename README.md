@@ -40,8 +40,10 @@ aim at.
 reopen button, so you can walk through a flow that leaves the panel, does work
 in the background, and comes back.
 
-**Serves on your network.** It listens on every interface, so you can open the
-preview on a tablet or a second machine, over Tailscale or a LAN.
+**Runs on localhost, and on your network too.** It binds to every interface, so
+the usual http://localhost:5178 works and you can also open the preview by IP
+from a tablet or a second machine, over a LAN or Tailscale, with no extra
+config.
 
 ## Setting it up for your plugin
 

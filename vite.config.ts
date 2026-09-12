@@ -52,18 +52,19 @@ export default defineConfig({
   server: {
     port: 5178,
     /**
-     * Listen on every interface, not loopback only, so the preview is reachable
-     * from another machine: a tablet, a second desktop, a colleague on the
-     * same network. `true` means 0.0.0.0: every network this machine is on. It
-     * serves a dev page with fixture data and no write path to anything, but if
-     * that is not a trade you want, put a specific address here instead.
+     * Bind to every interface. `true` means 0.0.0.0, which covers loopback, so
+     * http://localhost:5178 works as usual and the preview is also reachable by
+     * IP from a tablet or a second machine. It serves a dev page with fixture
+     * data and no write path to anything, but if you would rather it stayed on
+     * this machine, set a specific address here.
      */
     host: true,
     /**
-     * Vite refuses requests whose Host header it does not recognise (DNS
-     * rebinding protection), answering "Blocked request", which reads exactly
-     * like the server not running. Add the names you reach it by: a LAN IP, a
-     * Tailscale address, `.ts.net` for MagicDNS.
+     * Vite rejects requests whose Host header it does not recognise (DNS
+     * rebinding protection), answering "Blocked request", which reads like the
+     * server not running. Bare IP addresses are always accepted, so reaching
+     * the preview from another machine needs nothing here. Add an entry only
+     * for a NAME, such as a `.ts.net` MagicDNS address or a local hostname.
      */
     allowedHosts: ['localhost'],
     fs: {
