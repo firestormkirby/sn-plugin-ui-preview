@@ -7,13 +7,14 @@
  * window's size and produce a panel the wrong shape for the device you are
  * documenting. The iframe IS the screen.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { View, Text, Pressable, Image } from 'react-native';
 
 import { seed } from './mocks/async-storage';
 import { seedFiles, seedHashes } from './mocks/react-native-fs';
 import { onViewStateChange, CURRENT_PAGE, configureSdk } from './mocks/sn-plugin-lib';
+import type { CaptureEventDetail } from './mocks/react-native-view-shot';
 import config from '../preview.config';
 
 const params = new URLSearchParams(window.location.search);
@@ -110,6 +111,77 @@ function Toast() {
   );
 }
 
+/**
+ * Shows the last thing captureRef() photographed, see mocks/react-native-view-shot.ts.
+ *
+ * Plain DOM rather than React Native: the capture is a cloned DOM subtree,
+ * and it has to survive the panel closing, which is often the very next thing
+ * a plugin does after capturing.
+ */
+function CaptureCard() {
+  const [shot, setShot] = useState<CaptureEventDetail | null>(null);
+  const holder = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fn = (e: Event) => setShot((e as CustomEvent<CaptureEventDetail>).detail);
+    window.addEventListener('preview-capture', fn);
+    return () => window.removeEventListener('preview-capture', fn);
+  }, []);
+
+  // Scale the capture to 40% of the screen's width, whatever its own size.
+  const scale = shot ? (window.innerWidth * 0.4) / shot.width : 1;
+
+  useEffect(() => {
+    if (!shot || !holder.current) return;
+    const node = shot.node;
+    // Pin the clone to the size it had on screen: percentage and flex sizes
+    // would otherwise resolve against the card instead.
+    node.style.position = 'absolute';
+    node.style.left = '0';
+    node.style.top = '0';
+    node.style.margin = '0';
+    node.style.width = `${shot.width}px`;
+    node.style.height = `${shot.height}px`;
+    node.style.transformOrigin = 'top left';
+    node.style.transform = `scale(${scale})`;
+    holder.current.replaceChildren(node);
+  }, [shot, scale]);
+
+  if (!shot) return null;
+  return (
+    <div
+      style={{
+        position: 'absolute', left: 24, bottom: 24, zIndex: 1000,
+        background: '#fff', border: '3px solid #000', padding: 12,
+        font: '15px/1.4 system-ui, sans-serif', color: '#000',
+        boxShadow: '0 6px 24px rgba(0,0,0,.25)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+        <strong style={{ flex: 1 }}>
+          Last capture · {shot.outWidth} × {shot.outHeight}
+        </strong>
+        <button
+          onClick={() => setShot(null)}
+          style={{ font: 'inherit', border: '2px solid #000', background: '#fff', padding: '2px 10px', cursor: 'pointer' }}
+        >
+          Dismiss
+        </button>
+      </div>
+      <div
+        ref={holder}
+        style={{
+          position: 'relative', overflow: 'hidden', outline: '1px solid #999',
+          width: shot.width * scale, height: shot.height * scale,
+        }}
+      />
+      <div style={{ fontSize: 12, color: '#555', marginTop: 6, maxWidth: shot.width * scale, wordBreak: 'break-all' }}>
+        {shot.uri}
+      </div>
+    </div>
+  );
+}
+
 function Device() {
   const [open, setOpen] = useState(true);
   // Remounts the panel, so reopening runs its mount effects as a fresh open
@@ -130,6 +202,7 @@ function Device() {
         ? <Panel key={generation} />
         : <ClosedScreen onReopen={() => { setGeneration(g => g + 1); setOpen(true); }} />}
       <Toast />
+      <CaptureCard />
     </View>
   );
 }

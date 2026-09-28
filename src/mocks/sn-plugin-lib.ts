@@ -46,6 +46,14 @@ function setView(open: boolean) {
   for (const fn of viewListeners) fn(open);
 }
 
+/** A plain-valued answer that still leaves a line in the call trace. */
+function logged<T>(name: string, value: T) {
+  return (...args: unknown[]) => {
+    console.log(`[preview-sdk] ${name}`, ...args);
+    return Promise.resolve(value);
+  };
+}
+
 function toast(message: string) {
   window.dispatchEvent(new CustomEvent('preview-toast', { detail: message }));
 }
@@ -97,19 +105,30 @@ const defaults: Record<string, Record<string, (...args: any[]) => any>> = {
   },
   PluginDocAPI: {},
   /**
-   * Filesystem helpers. Answers are deliberately "nothing is there": an empty
-   * listing and exists:false, so a plugin renders its empty state rather than
-   * a half-populated one built from guesses. Give a scenario real answers
-   * through `sdk.overrides` when a screen needs files to show.
+   * Filesystem helpers. Unlike the API objects above, FileUtils is the bare
+   * native module (RTNFileUtils), so it resolves PLAIN values, not
+   * `{success, result}`: `exists()` gives `false`, not an object that happens
+   * to be truthy. Answers are deliberately "nothing is there": an empty listing
+   * and exists:false, so a plugin renders its empty state rather than a
+   * half-populated one built from guesses. Writes report success and change
+   * nothing. Give a scenario real answers through `sdk.overrides` when a
+   * screen needs files to show.
    */
   FileUtils: {
-    exists: () => ok(false),
-    listFiles: () => ok([]),
-    makeDir: () => ok(true),
-    deleteFile: () => ok(true),
-    renameToFile: () => ok(true),
-    openFilePath: () => ok(),
-    getExportPath: () => ok('/storage/emulated/0/EXPORT'),
+    exists: logged('FileUtils.exists', false),
+    getExternalDirPath: logged('FileUtils.getExternalDirPath', []),
+    makeDir: logged('FileUtils.makeDir', true),
+    getExportPath: logged('FileUtils.getExportPath', '/storage/emulated/0/EXPORT'),
+    renameToFile: logged('FileUtils.renameToFile', true),
+    copyFile: logged('FileUtils.copyFile', true),
+    listFiles: logged('FileUtils.listFiles', []),
+    getFileMD5: logged('FileUtils.getFileMD5', ''),
+    deleteFile: logged('FileUtils.deleteFile', true),
+    deleteDir: logged('FileUtils.deleteDir', true),
+    getFileList: logged('FileUtils.getFileList', []),
+    getImageList: logged('FileUtils.getImageList', []),
+    openFilePath: logged('FileUtils.openFilePath', true),
+    getStorageAvailableSpace: logged('FileUtils.getStorageAvailableSpace', 16 * 1024 ** 3),
   },
   /**
    * The native file picker. Returns nothing chosen, which is the "user backed

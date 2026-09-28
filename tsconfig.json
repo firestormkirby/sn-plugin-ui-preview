@@ -16,7 +16,8 @@
       "react-native": ["./src/mocks/react-native.ts"],
       "sn-plugin-lib": ["./src/mocks/sn-plugin-lib.ts"],
       "react-native-fs": ["./src/mocks/react-native-fs.ts"],
-      "@react-native-async-storage/async-storage": ["./src/mocks/async-storage.ts"]
+      "@react-native-async-storage/async-storage": ["./src/mocks/async-storage.ts"],
+      "react-native-view-shot": ["./src/mocks/react-native-view-shot.ts"]
     }
   },
   "include": ["src", "example", "preview.config.tsx", "vite.config.ts"]
