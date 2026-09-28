@@ -5,9 +5,10 @@
  * for state and SDK calls for everything else, so that replacing it with your own
  * component is the only step. Delete this folder once you have.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View, useWindowDimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { captureRef } from 'react-native-view-shot';
 import { PluginCommAPI, PluginFileAPI, PluginManager } from 'sn-plugin-lib';
 
 const SETTINGS_KEY = 'demo:settings:v1';
@@ -28,6 +29,7 @@ export default function DemoPanel(): React.JSX.Element {
   const [tab, setTab] = useState<Tab>('pages');
   const [settings, setSettings] = useState<Settings>({ compact: false, label: '' });
   const [where, setWhere] = useState<string>('…');
+  const panelRef = useRef(null);
 
   useEffect(() => {
     void (async () => {
@@ -52,7 +54,7 @@ export default function DemoPanel(): React.JSX.Element {
 
   return (
     <Pressable style={s.overlay} onPress={() => PluginManager.closePluginView()}>
-      <Pressable style={[s.panel, { height: panelH }]} onPress={(e: any) => e.stopPropagation()}>
+      <Pressable ref={panelRef} style={[s.panel, { height: panelH }]} onPress={(e: any) => e.stopPropagation()}>
         <View style={s.header}>
           <Text style={s.title}>Demo plugin</Text>
           <Pressable style={s.close} onPress={() => PluginManager.closePluginView()}>
@@ -89,6 +91,12 @@ export default function DemoPanel(): React.JSX.Element {
                 onPress={() => PluginManager.showToast('Nothing was written. This is a preview.')}
               >
                 <Text style={s.btnText}>Show a toast</Text>
+              </Pressable>
+              <Pressable
+                style={[s.btn, s.btnQuiet]}
+                onPress={() => void captureRef(panelRef, { format: 'png', result: 'tmpfile' })}
+              >
+                <Text style={s.btnText}>Capture this panel</Text>
               </Pressable>
             </>
           ) : (

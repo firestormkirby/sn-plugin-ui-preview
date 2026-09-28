@@ -66,7 +66,7 @@ export const ToastAndroid = {
   SHORT: 0,
   LONG: 1,
   show(message: string, _duration?: number): void {
-    window.dispatchEvent(new CustomEvent('mock-toast', { detail: message }));
+    window.dispatchEvent(new CustomEvent('preview-toast', { detail: message }));
   },
   showWithGravity(message: string, _d?: number, _g?: number): void {
     ToastAndroid.show(message);

@@ -86,7 +86,7 @@ const config: PreviewConfig = {
 
 If your plugin loads its storage lazily inside components, leave `boot` out.
 
-Four modules are swapped for browser versions, and everything else comes from
+Five modules are swapped for browser versions, and everything else comes from
 your repo:
 
 | Module | Swapped for |
@@ -95,6 +95,7 @@ your repo:
 | `sn-plugin-lib` | a mock that answers every call |
 | `react-native-fs` | a fake `/storage` tree |
 | `@react-native-async-storage/async-storage` | an in memory map, seeded per scenario |
+| `react-native-view-shot` | a capture that shows you what it captured |
 
 ## Scenarios
 
@@ -123,6 +124,18 @@ sdk: {
 
 Calls that would write to a file report success and log what they were asked to
 do, so clicking around a preview leaves your notes alone.
+
+## Captures
+
+A plugin that uses `react-native-view-shot` to turn a view into an image, say
+to insert it into a note, gets a **Last capture** card in the corner of the
+device screen showing exactly what `captureRef()` was pointed at, and the size
+of image it asked for. The card outlives `closePluginView()`, since closing is
+usually what a plugin does next. This is especially useful when the captured
+view is rendered out of sight, underneath the visible UI.
+
+The capture is a clone of the DOM, not a PNG, and the returned URI is a
+plausible path in the host's cache that nothing was written to.
 
 ## Screenshots
 

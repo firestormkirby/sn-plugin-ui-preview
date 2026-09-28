@@ -22,7 +22,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     /**
-     * The four substitutions that let device code run in a browser. Your own
+     * The substitutions that let device code run in a browser. Your own
      * source is imported as it is, so what you see here is the code that ships.
      *
      * The array form, with anchored patterns, because the object form matches
@@ -39,6 +39,10 @@ export default defineConfig({
       {
         find: /^@react-native-async-storage\/async-storage$/,
         replacement: path.resolve(here, 'src/mocks/async-storage.ts'),
+      },
+      {
+        find: /^react-native-view-shot$/,
+        replacement: path.resolve(here, 'src/mocks/react-native-view-shot.ts'),
       },
     ],
     extensions: ['.web.tsx', '.web.ts', '.tsx', '.ts', '.web.js', '.js', '.json'],
